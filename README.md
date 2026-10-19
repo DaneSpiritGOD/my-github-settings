@@ -1,6 +1,13 @@
 # GitHub Repository Security Baseline
 
-> Raw file (copy-friendly): https://raw.githubusercontent.com/DaneSpiritGOD/my-github-settings/refs/heads/main/README.md
+Copy below prompt into your coding agent:
+
+```md
+Make an execution plan that follows https://raw.githubusercontent.com/DaneSpiritGOD/my-github-settings/refs/heads/main/README.md. Note that:
+
+1. Do not follow all blindly. The instructions in that file may not suit here. The plan needs to compare pros and cons and give good explanation of our decisions.
+2. Do not execute the plan until I say 'go'.
+```
 
 ## 1. Secret Scanning
 
