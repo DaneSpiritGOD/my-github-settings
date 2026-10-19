@@ -1,0 +1,12 @@
+# Secrets / environment files
+.env
+.env.*
+*.pem
+*.key
+
+# OS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
