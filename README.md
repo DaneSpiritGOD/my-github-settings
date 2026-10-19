@@ -1,5 +1,7 @@
 # GitHub Repository Security Baseline
 
+> Raw file (copy-friendly): https://raw.githubusercontent.com/DaneSpiritGOD/my-github-settings/refs/heads/main/README.md
+
 ## 1. Secret Scanning
 
 | Setting | State | Notes |
