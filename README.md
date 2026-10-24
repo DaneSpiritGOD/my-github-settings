@@ -1,4 +1,4 @@
-# GitHub Repository Security Baseline
+# GitHub Repository Governance Preferences
 
 Copy below prompt into your coding agent:
 
