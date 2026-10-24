@@ -24,6 +24,18 @@ _Avoid_: Override, admin bypass shortcut
 An entry in `bypass_actors`, identified by actor type and, for most types, actor id. The whole list is per-ruleset, never per-rule, which is why rules are split across rulesets by whether they may be bypassed.
 _Avoid_: Exemption, exception
 
+**Bypass mode**:
+The value on a bypass actor that decides how far the escape hatch reaches — `always` (push or merge despite the rules) or `pull_request` (merge a pull request despite the rules, but no direct push to the default branch).
+_Avoid_: Bypass level, override mode
+
 **Required check**:
 A check-run name a bypassable ruleset demands on a pull request's head commit. It is matched by exact equality against the `name` of a check run, which defaults to the id of the job that produced it — never the workflow name, and never its provenance.
 _Avoid_: Status check name, CI requirement
+
+**PR-first landing**:
+The practice of landing every change through a pull request, with no direct pushes to the default branch; the owner holds the same rules as everyone else. Its ruleset shape pairs `bypass_mode: pull_request` with squash-only merges.
+_Avoid_: PR-only workflow, PR-first policy
+
+**Squash-only**:
+A merge policy that allows only squash merges, expressed as `allowed_merge_methods: ["squash"]` on the `pull_request` rule.
+_Avoid_: Squash merges only, linear-history merges

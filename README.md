@@ -68,7 +68,7 @@ This is an OAuth token scope issue, not a ruleset block.
 - **Design intent**: this rule set is reserved for **irreversible** damage. A deleted branch or a rewritten history cannot be undone by anyone, so no escape hatch is offered.
 - **Reference**: [`ruleset-examples/main-unbypassable.json`](./ruleset-examples/main-unbypassable.json)
 
-### 3.2 Bypassable ruleset
+### 3.2 Bypassable rulesets
 
 | Dimension | Value |
 |---|---|
@@ -76,15 +76,22 @@ This is an OAuth token scope issue, not a ruleset block.
 | Applied to | `~DEFAULT_BRANCH` |
 | Rule 1 | `pull_request` — changes reach the branch through a pull request |
 | Rule 2 (optional) | `required_status_checks` — pull requests must pass the named checks |
-| Bypass | repository admin role (`actor_id: 5`, `bypass_mode: always`) |
+| Bypass | repository admin role (`actor_id: 5`) — mode differs per variant, see below |
 
 - **UI entry point**: Settings → Rules → Rulesets
-- **Design intent**: this rule set covers **recoverable** mistakes — a blocked or malformed pull request can always be fixed — so an administrator gets an escape hatch. That hatch is load-bearing: pull requests opened with the default `GITHUB_TOKEN` trigger no workflows, so no check runs exist on their head commit, and a required check would sit at `Expected` forever.
-- **References**: [`main-with-pr.json`](./ruleset-examples/main-with-pr.json) · [`main-with-pr-and-checks.json`](./ruleset-examples/main-with-pr-and-checks.json) — at most one of these; they both describe the same ruleset.
+- **Design intent**: these rule sets cover **recoverable** mistakes — a blocked or malformed pull request can always be fixed — so an administrator gets an escape hatch. That hatch is load-bearing: pull requests opened with the default `GITHUB_TOKEN` trigger no workflows, so no check runs exist on their head commit, and a required check would sit at `Expected` forever. In both variants below the administrator can still merge such a stuck pull request; the variants differ only in whether a direct push to the default branch is also allowed.
+- **Two variants, differing in `bypass_mode`** — pick at most one:
 
-**`required_status_checks` is optional, and its check names are placeholders.** In `main-with-pr-and-checks.json` the contexts are `lint`, `type-check` and `test`; they were captured from one repository's CI jobs and will not exist in another. Replace them with the job names of the repository adopting the reference.
+| Variant | Reference | Checks | `bypass_mode` | What the admin may do |
+|---|---|---|---|---|
+| Escape hatch | [`main-with-pr.json`](./ruleset-examples/main-with-pr.json) | none | `always` | push to the default branch directly, and merge despite red/missing checks |
+| PR-first | [`main-with-pr-and-checks.json`](./ruleset-examples/main-with-pr-and-checks.json) | required | `pull_request` | merge a PR despite red/missing checks, but **not** push to the default branch directly |
 
-**Both rules only evaluate on pull request merges.** On a repository where maintainers push to the default branch directly, 3.2 protects against nothing that occurs — which is why 3.1 carries the rules that matter there.
+The **escape-hatch** variant fits repositories where maintainers push directly and bot-authored PRs need unblocking. The **PR-first** variant is the **PR-first landing** preference for solo repositories: every change reaches the default branch through a pull request, merged **squash-only** (`allowed_merge_methods: ["squash"]`), and the owner is bound by the same rules as everyone else — the only escape hatch left is merging a failing PR, never pushing to `main`.
+
+**`required_status_checks` is optional, and its check names are placeholders.** In `main-with-pr-and-checks.json` the contexts are `lint`, `type-check`, `test` and `build`; they were captured from one repository's CI jobs and will not exist in another. Replace them with the job names of the repository adopting the reference.
+
+**Both rules only evaluate on pull request merges.** On a repository where maintainers push to the default branch directly, the `pull_request` rule protects against nothing that occurs — which is why 3.1 carries the rules that matter there, and why the PR-first variant exists for repositories that want to stop direct pushes.
 
 ### 3.3 How required checks are matched
 
@@ -136,8 +143,8 @@ Traits: checked weekly; grouped commits (multiple Action updates within the grou
 
 ### 5.1 Do now (low cost)
 
-1. **`delete_branch_on_merge: true`** — removes leftover branches
-2. **Squash merge only** — linear history, easy to revert
+1. **`delete_branch_on_merge: true`** — removes leftover branches. Repo-level setting (Settings → General → "Automatically delete head branches"), not a ruleset rule; the PR-first variant (3.2) is compatible with it.
+2. **Squash merge only** — linear history, easy to revert. Either the repo-level merge button or, enforced per-ruleset, `allowed_merge_methods: ["squash"]` as the PR-first variant (3.2) does.
 3. **CODEOWNERS** (`.github/CODEOWNERS`) — even solo, explicitly declaring `* @<owner>` auto-requests owner review once collaborators are added later
 4. **`.github/pull_request_template.md` / ISSUE_TEMPLATE** — normalize input
 5. `.gitignore` hygiene (the first line of defense against leaks): ignore `.env`, `.env.local`, etc.
